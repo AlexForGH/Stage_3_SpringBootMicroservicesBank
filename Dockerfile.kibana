@@ -1,0 +1,13 @@
+FROM docker.elastic.co/kibana/kibana-oss:7.10.2
+
+# Копируем кастомную конфигурацию
+COPY kibana/config/kibana.yml /usr/share/kibana/config/kibana.yml
+
+# Пользователь kibana уже существует в образе
+USER kibana
+
+# Порт
+EXPOSE 5601
+
+# Команда запуска (базовый образ уже содержит CMD)
+CMD ["/usr/local/bin/kibana-docker"]

@@ -1,0 +1,9 @@
+server.name: kibana
+server.host: "0.0.0.0"
+elasticsearch.hosts: ["http://bank-elasticsearch-service:9200"]
+
+# Отключаем telemetry (опционально)
+telemetry.enabled: false
+
+# Настройки для разработки
+elasticsearch.requestTimeout: 30000

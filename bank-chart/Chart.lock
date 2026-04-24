@@ -1,0 +1,42 @@
+dependencies:
+- name: keycloak
+  repository: ""
+  version: 0.1.0
+- name: postgres
+  repository: ""
+  version: 0.1.0
+- name: global-config
+  repository: ""
+  version: 0.1.0
+- name: cash
+  repository: ""
+  version: 0.1.0
+- name: account
+  repository: ""
+  version: 0.1.0
+- name: transfer
+  repository: ""
+  version: 0.1.0
+- name: notification
+  repository: ""
+  version: 0.1.0
+- name: front-ui
+  repository: ""
+  version: 0.1.0
+- name: kafka
+  repository: ""
+  version: 0.1.0
+- name: zipkin
+  repository: ""
+  version: 0.1.0
+- name: logstash
+  repository: ""
+  version: 0.1.0
+- name: elasticsearch
+  repository: ""
+  version: 0.1.0
+- name: kibana
+  repository: ""
+  version: 0.1.0
+digest: sha256:69bde9f4262a90ab8438ac16cb5df1ff8a0485b58e159d9f7bfe7348b5d946d5
+generated: "2026-04-01T16:51:39.15688153+03:00"

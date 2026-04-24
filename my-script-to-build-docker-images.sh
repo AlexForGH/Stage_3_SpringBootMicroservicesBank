@@ -25,6 +25,14 @@ infra_services=(
     "kafka"
 )
 
+# Мониторинговые сервисы (логгинг, трейсинг, поиск, визуализация)
+monitoring_services=(
+    "zipkin"
+    "logstash"
+    "elasticsearch"
+    "kibana"
+)
+
 echo -e "${YELLOW}📦 Building all Spring Boot microservices with mvnw...${NC}\n"
 
 # Собираем все микросервисы
@@ -70,6 +78,29 @@ for service in "${infra_services[@]}"; do
     # Проверяем существование Dockerfile
     if [ ! -f "Dockerfile.$service" ]; then
         echo -e "${RED}❌ Dockerfile.$service not found!${NC}"
+        exit 1
+    fi
+
+    # Собираем образ
+    docker build -t "bank-$service:latest" -f "Dockerfile.$service" .
+
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}✅ Successfully built bank-$service:latest${NC}"
+    else
+        echo -e "${RED}❌ Failed to build bank-$service:latest${NC}"
+        exit 1
+    fi
+    echo "------------------------"
+done
+
+# Собираем мониторинговые сервисы
+for service in "${monitoring_services[@]}"; do
+    echo -e "${YELLOW}🔨 Building bank-$service:latest from Dockerfile.$service...${NC}"
+
+    # Проверяем существование Dockerfile
+    if [ ! -f "Dockerfile.$service" ]; then
+        echo -e "${RED}❌ Dockerfile.$service not found!${NC}"
+        echo -e "${YELLOW}💡 Создайте Dockerfile.$service для сервиса $service${NC}"
         exit 1
     fi
 

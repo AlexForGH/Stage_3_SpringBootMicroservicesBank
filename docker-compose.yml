@@ -20,7 +20,12 @@ x-n: &n
   NOTIFICATION_SERVER_URL: http://bank-notification-service:10004
 x-k: &k
   KAFKA_SERVER_URL: bank-kafka-service:9092
-
+x-z: &z
+  ZIPKIN_SERVER_URL: http://bank-zipkin-service:9411
+x-ls: &ls
+  LOGSTASH_SERVER_URL: bank-logstash-service:5000
+x-es: &es
+  ELASTICSEARCH_URL: http://bank-elasticsearch-service:9200
 
 services:
 
@@ -53,6 +58,77 @@ services:
       timeout: 5s
       retries: 5
 
+  bank-zipkin-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      - bank-network
+
+  bank-logstash-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.logstash
+    ports:
+      - "5000:5000"
+      - "9600:9600"
+    depends_on:
+      bank-elasticsearch-service:
+        condition: service_healthy
+    environment:
+      LS_JAVA_OPTS: -Xmx256m -Xms256m
+      <<: [*es]
+    networks:
+      - bank-network
+    restart: unless-stopped
+
+  bank-elasticsearch-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - bootstrap.memory_lock=true
+    networks:
+      - bank-network
+    restart: unless-stopped
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health > /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+
+  bank-kibana-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.kibana
+    ports:
+      - "5601:5601"
+    networks:
+      - bank-network
+    restart: unless-stopped
+    depends_on:
+      bank-elasticsearch-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5601/api/status > /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+
   bank-kafka-service:
     build:
       context: .
@@ -77,7 +153,6 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_LOG_DIRS: /var/lib/kafka/data
       KAFKA_CLUSTER_ID: "5L6g3nShT-eMCtK--X86sw"
-
     networks:
       - bank-network
     healthcheck:
@@ -112,7 +187,7 @@ services:
     ports:
       - "10001:10001"
     environment:
-      <<: [*gc, *kc, *db]
+      <<: [*gc, *kc, *db, *z]
     networks:
       - bank-network
     restart: unless-stopped  # Будет перезапускаться пока config не ответит
@@ -135,7 +210,7 @@ services:
     ports:
       - "10002:10002"
     environment:
-      <<: [*gc, *kc, *db, *c, *n, *k]
+      <<: [*gc, *kc, *db, *c, *n, *k, *z, *ls]
     networks:
       - bank-network
     restart: unless-stopped  # Будет перезапускаться пока config не ответит
@@ -162,7 +237,7 @@ services:
     ports:
       - "10003:10003"
     environment:
-      <<: [*gc, *kc, *c, *n, *k]
+      <<: [*gc, *kc, *c, *n, *k, *z]
     networks:
       - bank-network
     restart: unless-stopped  # Будет перезапускаться пока config не ответит
@@ -208,7 +283,7 @@ services:
     ports:
       - "30005:30005"
     environment:
-      <<: [*gc, *kc, *kcp, *a, *t]
+      <<: [*gc, *kc, *kcp, *a, *t, *z]
     networks:
       - bank-network
     restart: unless-stopped  # Будет перезапускаться пока config не ответит
@@ -231,3 +306,6 @@ services:
 networks:
   bank-network:
     driver: bridge
+
+volumes:
+  elasticsearch-data:

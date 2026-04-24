@@ -1,0 +1,3 @@
+FROM openzipkin/zipkin:3.5
+
+EXPOSE 9411

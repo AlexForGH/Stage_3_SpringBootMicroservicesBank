@@ -1,0 +1,21 @@
+replicaCount: 1
+image:
+  repository: bank-zipkin
+  tag: latest
+  pullPolicy: IfNotPresent
+service:
+  port: 9411
+  targetPort: 9411
+  name: bank-zipkin-service
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+probe:
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 10

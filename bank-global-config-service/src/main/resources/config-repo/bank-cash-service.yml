@@ -18,6 +18,15 @@ management:
     readinessstate:
       enabled: true
 
+  tracing:
+    enabled: true
+    export:
+      zipkin:
+        enabled: true
+        endpoint: ${ZIPKIN_SERVER_URL:http://localhost:9411}/api/v2/spans # Эндпоинт Zipkin
+    sampling:
+      probability: 1 # Частота отправляемых трейсов
+
 spring:
   datasource:
     url: jdbc:postgresql://${DB_URL_PART:localhost:5432}/my_schema

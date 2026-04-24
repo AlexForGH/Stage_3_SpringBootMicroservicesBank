@@ -46,6 +46,10 @@ spec:
           value: {{ $.Values.global.serviceUrls.notification }}
         - name: KAFKA_SERVER_URL
           value: {{ $.Values.global.serviceUrls.kafka }}
+        - name: ZIPKIN_SERVER_URL
+          value: {{ $.Values.global.serviceUrls.zipkin }}
+        - name: LOGSTASH_SERVER_URL
+          value: {{ $.Values.global.serviceUrls.logstash }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
         livenessProbe:

@@ -5,6 +5,8 @@ import org.pl.model.Account;
 import org.pl.service.AccountService;
 import org.pl.service.GetCashService;
 import org.pl.service.PullNotificationService;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -21,15 +23,18 @@ public class AccountController {
     private final AccountService accountService;
     private final GetCashService getCashService;
     private final PullNotificationService pullNotificationService;
+    private final Logger customLogger;
 
     public AccountController(
             AccountService accountService,
             GetCashService getCashService,
-            PullNotificationService pullNotificationService
+            PullNotificationService pullNotificationService,
+            @Qualifier("customLogger") Logger customLogger
     ) {
         this.accountService = accountService;
         this.getCashService = getCashService;
         this.pullNotificationService = pullNotificationService;
+        this.customLogger = customLogger;
     }
 
     @PreAuthorize("hasRole('MANAGE_SELF_INFO')")
@@ -39,6 +44,7 @@ public class AccountController {
         Account account = accountService.findByLogin(login);
         account.setCash(cashResponse.getCash());
         pullNotificationService.pullNotification("передан в UI аккаунт: " + account);
+        customLogger.info("передан в UI аккаунт: {}", account);
         return account;
     }
 
@@ -47,6 +53,7 @@ public class AccountController {
     public List<Account> findAll() {
         List<Account> accounts = accountService.findAll();
         pullNotificationService.pullNotification("передан в UI список аккаунтов: " + accounts.toString());
+        customLogger.info("передан в UI список аккаунтов: {}", accounts);
         return accounts;
     }
 
@@ -65,6 +72,7 @@ public class AccountController {
 
         accountService.save(account);
         pullNotificationService.pullNotification("обновлен и передан в UI аккаунт: " + account);
+        customLogger.info("обновлен и передан в UI аккаунт: {}", account);
         return accountService.save(account);
     }
 }

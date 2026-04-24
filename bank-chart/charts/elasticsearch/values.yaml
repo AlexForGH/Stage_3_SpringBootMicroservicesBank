@@ -1,0 +1,26 @@
+replicaCount: 1
+image:
+  repository: bank-elasticsearch
+  tag: latest
+  pullPolicy: IfNotPresent
+service:
+  port: 9200
+  targetPort: 9200
+  transportPort: 9300
+  transportTargetPort: 9300
+  name: bank-elasticsearch-service
+resources:
+  requests:
+    memory: "768Mi"
+    cpu: "250m"
+  limits:
+    memory: "1536Mi"
+    cpu: "1000m"
+persistence:
+  enabled: true
+  size: 2Gi
+probe:
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 20

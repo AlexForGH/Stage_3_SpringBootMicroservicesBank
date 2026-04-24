@@ -33,3 +33,15 @@ dependencies:
   - name: kafka
     version: 0.1.0
     condition: kafka.enabled
+  - name: zipkin
+    version: 0.1.0
+    condition: zipkin.enabled
+  - name: logstash
+    version: 0.1.0
+    condition: logstash.enabled
+  - name: elasticsearch
+    version: 0.1.0
+    condition: elasticsearch.enabled
+  - name: kibana
+    version: 0.1.0
+    condition: kibana.enabled

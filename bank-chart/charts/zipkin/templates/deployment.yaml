@@ -1,60 +1,39 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-cash
+  name: {{ .Release.Name }}-zipkin
   labels:
-    app: cash
+    app: zipkin
     release: {{ .Release.Name }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: cash
+      app: zipkin
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: cash
+        app: zipkin
         release: {{ .Release.Name }}
     spec:
       containers:
-      - name: cash
+      - name: zipkin
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.service.targetPort }}
-        env:
-        # Spring Cloud Config
-        - name: GLOBAL_CONFIG_SERVER_URL
-          value: {{ $.Values.global.serviceUrls.globalConfig }}
-        - name: SPRING_CLOUD_CONFIG_FAIL_FAST
-          value: "true"
-        - name: SPRING_CLOUD_CONFIG_RETRY_MAX_ATTEMPTS
-          value: "20"
-        # Keycloak
-        - name: KEYCLOAK_HOST
-          value: {{ $.Values.global.serviceUrls.keycloak }}
-        - name: KEYCLOAK_PUBLIC_HOST
-          value: {{ $.Values.global.serviceUrls.keycloakPublic }}
-        - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
-          value: {{ $.Values.global.serviceUrls.keycloak }}/realms/bank-realm
-        - name: DB_URL_PART
-          value: {{ $.Values.global.serviceUrls.postgres }}
-        - name: ZIPKIN_SERVER_URL
-          value: {{ $.Values.global.serviceUrls.zipkin }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
         livenessProbe:
-          httpGet:
-            path: /actuator/health/liveness
+          tcpSocket:
             port: {{ .Values.service.targetPort }}
           initialDelaySeconds: {{ .Values.probe.initialDelaySeconds }}
           periodSeconds: {{ .Values.probe.periodSeconds }}
           timeoutSeconds: {{ .Values.probe.timeoutSeconds }}
           failureThreshold: {{ .Values.probe.failureThreshold }}
         readinessProbe:
-          httpGet:
-            path: /actuator/health/readiness
+          tcpSocket:
             port: {{ .Values.service.targetPort }}
           initialDelaySeconds: {{ .Values.probe.initialDelaySeconds }}
           periodSeconds: {{ .Values.probe.periodSeconds }}

@@ -1,56 +1,42 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-transfer
+  name: {{ .Release.Name }}-elasticsearch
   labels:
-    app: transfer
+    app: elasticsearch
     release: {{ .Release.Name }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: transfer
+      app: elasticsearch
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: transfer
+        app: elasticsearch
         release: {{ .Release.Name }}
     spec:
       containers:
-      - name: transfer
+      - name: elasticsearch
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.service.targetPort }}
+        - containerPort: {{ .Values.service.transportTargetPort }}
         env:
-        # Spring Cloud Config
-        - name: GLOBAL_CONFIG_SERVER_URL
-          value: {{ $.Values.global.serviceUrls.globalConfig }}
-        - name: SPRING_CLOUD_CONFIG_FAIL_FAST
+        - name: ES_JAVA_OPTS
+          value: "-Xms512m -Xmx512m"
+        - name: bootstrap.memory_lock
           value: "true"
-        - name: SPRING_CLOUD_CONFIG_RETRY_MAX_ATTEMPTS
-          value: "20"
-        # Keycloak
-        - name: KEYCLOAK_HOST
-          value: {{ $.Values.global.serviceUrls.keycloak }}
-        - name: KEYCLOAK_PUBLIC_HOST
-          value: {{ $.Values.global.serviceUrls.keycloakPublic }}
-        - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
-          value: {{ $.Values.global.serviceUrls.keycloak }}/realms/bank-realm
-        - name: CASH_SERVER_URL
-          value: {{ $.Values.global.serviceUrls.cash }}
-        - name: NOTIFICATION_SERVER_URL
-          value: {{ $.Values.global.serviceUrls.notification }}
-        - name: KAFKA_SERVER_URL
-          value: {{ $.Values.global.serviceUrls.kafka }}
-        - name: ZIPKIN_SERVER_URL
-          value: {{ $.Values.global.serviceUrls.zipkin }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
+        volumeMounts:
+        - name: elasticsearch-data
+          mountPath: /usr/share/elasticsearch/data
         livenessProbe:
           httpGet:
-            path: /actuator/health/liveness
+            path: /_cluster/health
             port: {{ .Values.service.targetPort }}
           initialDelaySeconds: {{ .Values.probe.initialDelaySeconds }}
           periodSeconds: {{ .Values.probe.periodSeconds }}
@@ -58,10 +44,14 @@ spec:
           failureThreshold: {{ .Values.probe.failureThreshold }}
         readinessProbe:
           httpGet:
-            path: /actuator/health/readiness
+            path: /_cluster/health
             port: {{ .Values.service.targetPort }}
           initialDelaySeconds: {{ .Values.probe.initialDelaySeconds }}
           periodSeconds: {{ .Values.probe.periodSeconds }}
           timeoutSeconds: {{ .Values.probe.timeoutSeconds }}
           failureThreshold: {{ .Values.probe.failureThreshold }}
+      volumes:
+      - name: elasticsearch-data
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-elasticsearch-pvc
       restartPolicy: Always

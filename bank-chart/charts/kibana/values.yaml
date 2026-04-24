@@ -1,0 +1,21 @@
+replicaCount: 1
+image:
+  repository: bank-kibana
+  tag: latest
+  pullPolicy: IfNotPresent
+service:
+  port: 5601
+  targetPort: 5601
+  name: bank-kibana-service
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "768Mi"
+    cpu: "500m"
+probe:
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 20

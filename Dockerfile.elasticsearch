@@ -1,0 +1,11 @@
+FROM docker.elastic.co/elasticsearch/elasticsearch-oss:7.10.2
+
+# Копируем кастомную конфигурацию
+COPY elasticsearch/config/elasticsearch.yml /usr/share/elasticsearch/config/elasticsearch.yml
+# Пользователь elasticsearch уже существует в образе
+USER elasticsearch
+# Порты
+EXPOSE 9200
+EXPOSE 9300
+# Команда запуска
+CMD ["/usr/local/bin/docker-entrypoint.sh"]

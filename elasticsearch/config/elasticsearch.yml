@@ -1,0 +1,8 @@
+cluster.name: "bank-cluster"
+network.host: 0.0.0.0
+
+# Настройки для разработки
+discovery.type: single-node
+
+# Настройки памяти (передаются через environment)
+bootstrap.memory_lock: true

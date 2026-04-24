@@ -3,8 +3,8 @@
 ![Демо работы](./demo.gif)
 
 ## *EN*
-#### Project to demonstrate the capabilities of developing a microservice application using Spring Boot, organizing configuration management via Spring Boot Cloud, ensuring security via Spring Security and Keycloak, deploying using k8s via the Helm package manager, and messaging using Kafka
-#### Tech stack: Spring Framework, Spring Boot, PostgreSQL, HTML, Thymeleaf, Spring Web, Spring Data JPA, Spring Cloud, RESTful API, Spring Security, Keycloak, Docker, k8s (Rancher Desktop), Helm, Kafka
+#### Project to demonstrate the capabilities of developing a microservice application using Spring Boot, organizing configuration management via Spring Boot Cloud, ensuring security via Spring Security and Keycloak, deploying using k8s via the Helm package manager, messaging using Kafka, tracing with Zipkin and logging via ELK-stack
+#### Tech stack: Spring Framework, Spring Boot, PostgreSQL, HTML, Thymeleaf, Spring Web, Spring Data JPA, Spring Cloud, RESTful API, Spring Security, Keycloak, Docker, k8s (Rancher Desktop), Helm, Kafka, Zipkin, Elasticsearch, Logstash, Kibana
 
 ### Application features:
     - user editing of their data
@@ -30,6 +30,8 @@
             - assign them the appropriate roles/permissions
             - open a browser at http://localhost:30005/
             - the application's start page will open
+            - Zipkin: http://localhost:30411
+            - Kibana: http://localhost:30601
        2. Without an IDE
             - clone the repository
             - run the Docker image build script: ./my-script-to-build-docker-images.sh
@@ -42,11 +44,13 @@
             - assign them the appropriate roles/permissions
             - open a browser at http://localhost:30005/
             - the application's start page will open
+            - Zipkin: http://localhost:30411
+            - Kibana: http://localhost:30601
 
 
 ## *RU*
-#### Проект для демонстрации возможностей разработки с использованием Spring Boot микросервисного приложения, организации управления конфигурациями через Spring Boot Cloud, обеспечения безопасности через Spring Security и Keycloak, деплоя с помощью k8s через пакетный менеджер Helm и предачи сообщений с помощью Kafka
-#### Технологический стек: Spring Framework, Spring Boot, PostgreSQL, HTML, Thymeleaf, Spring Web, Spring Data JPA, Spring Cloud, RESTful API, Spring Security, Keycloak, Docker, k8s (Rancher Desktop), Helm, Kafka
+#### Проект для демонстрации возможностей разработки с использованием Spring Boot микросервисного приложения, организации управления конфигурациями через Spring Boot Cloud, обеспечения безопасности через Spring Security и Keycloak, деплоя с помощью k8s через пакетный менеджер Helm, предачи сообщений с помощью Kafka, трассирования через Zipkin и логирования через ELK-stack
+#### Технологический стек: Spring Framework, Spring Boot, PostgreSQL, HTML, Thymeleaf, Spring Web, Spring Data JPA, Spring Cloud, RESTful API, Spring Security, Keycloak, Docker, k8s (Rancher Desktop), Helm, Kafka, Zipkin, Elasticsearch, Logstash, Kibana
 
 ### Возможности приложения:
     - редактирование пользоватлем своих данных
@@ -72,6 +76,8 @@
             - назначить им соответствующие роли/права
             - зайти в браузер по адресу http://localhost:30005/
             - откроется стартовая страница приложения
+            - Zipkin: http://localhost:30411
+            - Kibana: http://localhost:30601
     2. Без использования IDE
             - клонировать репозиторий
             - запустить скрипт сборки docker-образов: ./my-script-to-build-docker-images.sh
@@ -84,3 +90,5 @@
             - назначить им соответствующие роли/права
             - зайти в браузер по адресу http://localhost:30005/
             - откроется стартовая страница приложения
+            - Zipkin: http://localhost:30411
+            - Kibana: http://localhost:30601

@@ -1,56 +1,33 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-transfer
+  name: {{ .Release.Name }}-kibana
   labels:
-    app: transfer
+    app: kibana
     release: {{ .Release.Name }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: transfer
+      app: kibana
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: transfer
+        app: kibana
         release: {{ .Release.Name }}
     spec:
       containers:
-      - name: transfer
+      - name: kibana
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         ports:
         - containerPort: {{ .Values.service.targetPort }}
-        env:
-        # Spring Cloud Config
-        - name: GLOBAL_CONFIG_SERVER_URL
-          value: {{ $.Values.global.serviceUrls.globalConfig }}
-        - name: SPRING_CLOUD_CONFIG_FAIL_FAST
-          value: "true"
-        - name: SPRING_CLOUD_CONFIG_RETRY_MAX_ATTEMPTS
-          value: "20"
-        # Keycloak
-        - name: KEYCLOAK_HOST
-          value: {{ $.Values.global.serviceUrls.keycloak }}
-        - name: KEYCLOAK_PUBLIC_HOST
-          value: {{ $.Values.global.serviceUrls.keycloakPublic }}
-        - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
-          value: {{ $.Values.global.serviceUrls.keycloak }}/realms/bank-realm
-        - name: CASH_SERVER_URL
-          value: {{ $.Values.global.serviceUrls.cash }}
-        - name: NOTIFICATION_SERVER_URL
-          value: {{ $.Values.global.serviceUrls.notification }}
-        - name: KAFKA_SERVER_URL
-          value: {{ $.Values.global.serviceUrls.kafka }}
-        - name: ZIPKIN_SERVER_URL
-          value: {{ $.Values.global.serviceUrls.zipkin }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
         livenessProbe:
           httpGet:
-            path: /actuator/health/liveness
+            path: /api/status
             port: {{ .Values.service.targetPort }}
           initialDelaySeconds: {{ .Values.probe.initialDelaySeconds }}
           periodSeconds: {{ .Values.probe.periodSeconds }}
@@ -58,7 +35,7 @@ spec:
           failureThreshold: {{ .Values.probe.failureThreshold }}
         readinessProbe:
           httpGet:
-            path: /actuator/health/readiness
+            path: /api/status
             port: {{ .Values.service.targetPort }}
           initialDelaySeconds: {{ .Values.probe.initialDelaySeconds }}
           periodSeconds: {{ .Values.probe.periodSeconds }}

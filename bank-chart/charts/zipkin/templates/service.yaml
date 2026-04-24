@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.service.name }}
+  labels:
+    app: zipkin
+    release: {{ .Release.Name }}
+spec:
+  type: {{ .Values.global.exposure.zipkin.type }}
+  ports:
+  - port: {{ .Values.service.port }}
+    targetPort: {{ .Values.service.targetPort }}
+    protocol: TCP
+    name: http
+    {{- if eq .Values.global.exposure.zipkin.type "NodePort" }}
+    nodePort: {{ .Values.global.exposure.zipkin.nodePort }}
+    {{- end }}
+  selector:
+    app: zipkin
+    release: {{ .Release.Name }}

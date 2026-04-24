@@ -1,0 +1,19 @@
+FROM docker.elastic.co/logstash/logstash:7.10.2
+
+# Удаляем дефолтную конфигурацию
+RUN rm -f /usr/share/logstash/pipeline/logstash.conf
+
+# Копируем нашу конфигурацию
+COPY logstash/pipeline/logstash.conf /usr/share/logstash/pipeline/logstash.conf
+
+# Создаем папку для данных
+RUN mkdir -p /usr/share/logstash/data
+
+# Даем права на запись (UID 1000)
+RUN chown -R logstash:logstash /usr/share/logstash/data
+
+EXPOSE 5000
+EXPOSE 9600
+
+# Запускаем Logstash
+CMD ["logstash"]

@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.service.name }}
+  labels:
+    app: logstash
+    release: {{ .Release.Name }}
+spec:
+  type: ClusterIP
+  ports:
+  - port: {{ .Values.service.port }}
+    targetPort: {{ .Values.service.targetPort }}
+    protocol: TCP
+    name: logs
+  - port: {{ .Values.service.metricsPort }}
+    targetPort: {{ .Values.service.metricsTargetPort }}
+    protocol: TCP
+    name: metrics
+  selector:
+    app: logstash
+    release: {{ .Release.Name }}

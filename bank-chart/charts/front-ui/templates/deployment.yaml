@@ -42,6 +42,8 @@ spec:
           value: {{ $.Values.global.serviceUrls.account }}
         - name: TRANSFER_SERVER_URL
           value: {{ $.Values.global.serviceUrls.transfer }}
+        - name: ZIPKIN_SERVER_URL
+          value: {{ $.Values.global.serviceUrls.zipkin }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
         livenessProbe:
