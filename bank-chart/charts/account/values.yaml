@@ -1,0 +1,21 @@
+replicaCount: 1
+image:
+  repository: bank-account
+  tag: latest
+  pullPolicy: IfNotPresent
+service:
+  port: 10002
+  targetPort: 10002
+  name: bank-account-service
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+probe:
+  initialDelaySeconds: 40
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 10

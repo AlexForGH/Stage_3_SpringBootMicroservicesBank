@@ -1,0 +1,21 @@
+replicaCount: 1
+image:
+  repository: bank-front-ui
+  tag: latest
+  pullPolicy: IfNotPresent
+service:
+  port: 30005
+  targetPort: 30005
+  name: bank-front-ui-service
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+probe:
+  initialDelaySeconds: 40
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 10

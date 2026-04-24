@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.service.name }}
+  labels:
+    app: front-ui
+    release: {{ .Release.Name }}
+spec:
+  type: {{ if eq .Chart.Name "front-ui" }}{{ .Values.global.exposure.frontUi.type }}{{ else }}ClusterIP{{ end }}
+  ports:
+  - port: {{ .Values.service.port }}
+    targetPort: {{ .Values.service.targetPort }}
+    protocol: TCP
+    name: http
+    {{- if and (eq .Chart.Name "front-ui") (eq .Values.global.exposure.frontUi.type "NodePort") }}
+    nodePort: {{ .Values.global.exposure.frontUi.nodePort }}
+    {{- end }}
+  selector:
+    app: front-ui
+    release: {{ .Release.Name }}

@@ -1,0 +1,21 @@
+replicaCount: 1
+image:
+  repository: bank-keycloak
+  tag: latest
+  pullPolicy: IfNotPresent
+service:
+  port: 8080
+  targetPort: 8080
+  name: keycloak-service
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "500m"
+  limits:
+    memory: "1Gi"
+    cpu: "1000m"
+probe:
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 20

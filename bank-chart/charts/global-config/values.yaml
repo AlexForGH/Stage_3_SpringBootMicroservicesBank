@@ -1,0 +1,21 @@
+replicaCount: 1
+image:
+  repository: bank-global-config
+  tag: latest
+  pullPolicy: IfNotPresent
+service:
+  port: 10000
+  targetPort: 10000
+  name: bank-global-config-service
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+probe:
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 10

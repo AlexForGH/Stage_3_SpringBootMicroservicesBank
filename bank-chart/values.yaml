@@ -1,0 +1,213 @@
+global:
+  serviceUrls:
+    keycloak: "http://keycloak-service:8080"
+    postgres: "postgres-service:5432"
+    globalConfig: "http://bank-global-config-service:10000"
+    cash: "http://bank-cash-service:10001"
+    account: "http://bank-account-service:10002"
+    transfer: "http://bank-transfer-service:10003"
+    notification: "http://bank-notification-service:10004"
+    frontUi: "http://bank-front-ui-service:30005"
+    keycloakPublic: "http://localhost:30080"
+  exposure:
+    keycloak:
+      type: NodePort
+      nodePort: 30080
+    frontUi:
+      type: NodePort
+      nodePort: 30005
+
+keycloak:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: bank-keycloak
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 8080
+    targetPort: 8080
+    name: keycloak-service
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "500m"
+    limits:
+      memory: "1Gi"
+      cpu: "1000m"
+  probe:
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 20
+
+postgres:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: bank-postgres
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 5432
+    targetPort: 5432
+    name: postgres-service
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  persistence:
+    enabled: true
+    size: 1Gi
+  probe:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 5
+    failureThreshold: 5
+
+global-config:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: bank-global-config
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 10000
+    targetPort: 10000
+    name: bank-global-config-service
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "50m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  probe:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 10
+
+cash:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: bank-cash
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 10001
+    targetPort: 10001
+    name: bank-cash-service
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  probe:
+    initialDelaySeconds: 40
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 10
+
+account:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: bank-account
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 10002
+    targetPort: 10002
+    name: bank-account-service
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  probe:
+    initialDelaySeconds: 40
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 10
+
+transfer:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: bank-transfer
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 10003
+    targetPort: 10003
+    name: bank-transfer-service
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  probe:
+    initialDelaySeconds: 40
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 10
+
+notification:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: bank-notification
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 10004
+    targetPort: 10004
+    name: bank-notification-service
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  probe:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 10
+
+front-ui:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: bank-front-ui
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 30005
+    targetPort: 30005
+    name: bank-front-ui-service
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  probe:
+    initialDelaySeconds: 40
+    periodSeconds: 10
+    timeoutSeconds: 3
+    failureThreshold: 10

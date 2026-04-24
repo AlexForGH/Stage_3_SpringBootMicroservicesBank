@@ -170,7 +170,7 @@ services:
       context: .
       dockerfile: Dockerfile.front-ui
     ports:
-      - "10005:10005"
+      - "30005:30005"
     environment:
       <<: [*gc, *kc, *kcp, *a, *t]
     networks:
@@ -186,7 +186,7 @@ services:
       keycloak-service:
         condition: service_started
     healthcheck:
-      test: ["CMD-SHELL", "bash -c '</dev/tcp/localhost/10005'"]
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/localhost/30005'"]
       interval: 10s
       timeout: 3s
       retries: 10

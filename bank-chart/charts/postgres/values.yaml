@@ -1,0 +1,24 @@
+replicaCount: 1
+image:
+  repository: bank-postgres
+  tag: latest
+  pullPolicy: IfNotPresent
+service:
+  port: 5432
+  targetPort: 5432
+  name: postgres-service
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+persistence:
+  enabled: true
+  size: 1Gi
+probe:
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 5
+  failureThreshold: 5

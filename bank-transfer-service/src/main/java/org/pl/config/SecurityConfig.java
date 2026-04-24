@@ -27,6 +27,13 @@ public class SecurityConfig {
         http
                 .addFilterBefore(tokenLoggingFilter, BasicAuthenticationFilter.class)
                 .authorizeHttpRequests(auth -> auth
+                        // ВАЖНО: разрешаем actuator endpoints без аутентификации, k8s иначе не чекнет пробы
+                        .requestMatchers(
+                                "/actuator/health/**",
+                                "/actuator/info",
+                                "/actuator/health/liveness",
+                                "/actuator/health/readiness"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

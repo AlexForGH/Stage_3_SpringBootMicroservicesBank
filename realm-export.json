@@ -676,12 +676,12 @@
       "clientAuthenticatorType": "client-secret",
       "secret": "qfLkFz0Jy8OrMNrjeGRHRFTaVqR5HYTL",
       "redirectUris": [
-        "http://localhost:10005/login/oauth2/code/*",
-        "http://bank-front-ui-service:10005/login/oauth2/code/*"
+        "http://localhost:30005/login/oauth2/code/*",
+        "http://bank-front-ui-service:30005/login/oauth2/code/*"
       ],
       "webOrigins": [
-        "http://localhost:10005",
-        "http://bank-front-ui-service:10005"
+        "http://localhost:30005",
+        "http://bank-front-ui-service:30005"
       ],
       "notBefore": 0,
       "bearerOnly": false,

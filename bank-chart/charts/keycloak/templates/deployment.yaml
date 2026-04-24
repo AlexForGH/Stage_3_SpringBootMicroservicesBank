@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-keycloak
+  labels:
+    app: keycloak
+    release: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: keycloak
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: keycloak
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: keycloak
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.service.targetPort }}
+        env:
+        - name: KEYCLOAK_ADMIN
+          value: "admin"
+        - name: KEYCLOAK_ADMIN_PASSWORD
+          value: "admin"
+        - name: KC_HOSTNAME
+          value: "localhost"
+        - name: KC_HOSTNAME_PORT
+          value: "{{ .Values.global.exposure.keycloak.nodePort }}"
+        - name: KC_PROXY
+          value: "edge"
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.service.targetPort }}
+          initialDelaySeconds: {{ .Values.probe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.probe.periodSeconds }}
+          timeoutSeconds: {{ .Values.probe.timeoutSeconds }}
+          failureThreshold: {{ .Values.probe.failureThreshold }}
+        readinessProbe:
+          tcpSocket:
+            port: {{ .Values.service.targetPort }}
+          initialDelaySeconds: {{ .Values.probe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.probe.periodSeconds }}
+          timeoutSeconds: {{ .Values.probe.timeoutSeconds }}
+          failureThreshold: {{ .Values.probe.failureThreshold }}
+      restartPolicy: Always

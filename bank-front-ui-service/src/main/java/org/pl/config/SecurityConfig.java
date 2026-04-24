@@ -32,6 +32,13 @@ public class SecurityConfig {
                 // Никаких открытых страниц, никакого сваггера, ничего.
                 // Либо залогинен, либо получаем 401
                 .authorizeHttpRequests(auth -> auth
+                        // ВАЖНО: разрешаем actuator endpoints без аутентификации, k8s иначе не чекнет пробы
+                        .requestMatchers(
+                                "/actuator/health/**",
+                                "/actuator/info",
+                                "/actuator/health/liveness",
+                                "/actuator/health/readiness"
+                        ).permitAll()
                         // Все запросы требуют аутентификации
                         .anyRequest().authenticated()
                 )

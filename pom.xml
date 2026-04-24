@@ -4,10 +4,10 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.pl</groupId>
-	<artifactId>Stage_3_SpringBootMicroservicesBank</artifactId>
+	<artifactId>Stage_3_1_SpringBootCloudSimpleMicroservicesBank</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
-	<name>Stage_3_SpringBootMicroservicesBank</name>
+	<name>Stage_3_1_SpringBootCloudSimpleMicroservicesBank</name>
 
     <modules>
         <module>bank-account-service</module>
@@ -19,7 +19,7 @@
     </modules>
 
 	<properties>
-		<java.version>23</java.version>
+		<java.version>21</java.version>
         <spring-boot.version>4.0.2</spring-boot.version>
         <spring-cloud.version>2025.1.0</spring-cloud.version>
 	</properties>

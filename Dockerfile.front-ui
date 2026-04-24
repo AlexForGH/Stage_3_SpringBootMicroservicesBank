@@ -41,6 +41,6 @@ WORKDIR /app
 COPY bank-front-ui-service/target/bank-front-ui-service-0.0.1-SNAPSHOT.jar app.jar
 
 # Открываем порт
-EXPOSE 10005
+EXPOSE 30005
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
