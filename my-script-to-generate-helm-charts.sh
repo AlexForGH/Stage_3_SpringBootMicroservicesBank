@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Создаем структуру директорий
-mkdir -p bank-chart/charts/{keycloak,postgres,global-config,cash,account,transfer,notification,front-ui}/templates
+mkdir -p bank-chart/charts/{keycloak,kafka,postgres,global-config,cash,account,transfer,notification,front-ui}/templates
 
 # Создаем корневой Chart.yaml
 cat > bank-chart/Chart.yaml << 'EOF'
@@ -37,6 +37,9 @@ dependencies:
   - name: front-ui
     version: 0.1.0
     condition: front-ui.enabled
+  - name: kafka
+    version: 0.1.0
+    condition: kafka.enabled
 EOF
 
 # Создаем корневой values.yaml
@@ -52,6 +55,7 @@ global:
     notification: "http://bank-notification-service:10004"
     frontUi: "http://bank-front-ui-service:30005"
     keycloakPublic: "http://localhost:30080"
+    kafka: "bank-kafka-service:9092"
   exposure:
     keycloak:
       type: NodePort
@@ -110,6 +114,33 @@ postgres:
     periodSeconds: 5
     timeoutSeconds: 5
     failureThreshold: 5
+
+kafka:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: bank-kafka
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 9092
+    targetPort: 9092
+    name: bank-kafka-service
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  persistence:
+    enabled: true
+    size: 512Mi
+  probe:
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 10
 
 global-config:
   enabled: true
@@ -400,14 +431,19 @@ create_java_subchart "account" "10002" "40" "        - name: DB_URL_PART
         - name: CASH_SERVER_URL
           value: {{ $.Values.global.serviceUrls.cash }}
         - name: NOTIFICATION_SERVER_URL
-          value: {{ $.Values.global.serviceUrls.notification }}"
+          value: {{ $.Values.global.serviceUrls.notification }}
+        - name: KAFKA_SERVER_URL
+          value: {{ $.Values.global.serviceUrls.kafka }}"
 
 create_java_subchart "transfer" "10003" "40" "        - name: CASH_SERVER_URL
           value: {{ $.Values.global.serviceUrls.cash }}
         - name: NOTIFICATION_SERVER_URL
-          value: {{ $.Values.global.serviceUrls.notification }}"
+          value: {{ $.Values.global.serviceUrls.notification }}
+        - name: KAFKA_SERVER_URL
+          value: {{ $.Values.global.serviceUrls.kafka }}"
 
-create_java_subchart "notification" "10004" "30" ""
+create_java_subchart "notification" "10004" "30" "        - name: KAFKA_SERVER_URL
+          value: {{ $.Values.global.serviceUrls.kafka }}"
 
 create_java_subchart "front-ui" "30005" "40" "        - name: ACCOUNT_SERVER_URL
           value: {{ $.Values.global.serviceUrls.account }}
@@ -527,6 +563,181 @@ spec:
   selector:
     app: keycloak
     release: {{ .Release.Name }}
+EOF
+
+# Создаем директорию для Kafka
+mkdir -p bank-chart/charts/kafka/templates
+
+# Chart.yaml для Kafka
+cat > bank-chart/charts/kafka/Chart.yaml << 'EOF'
+apiVersion: v2
+name: kafka
+description: Kafka message broker
+type: application
+version: 0.1.0
+appVersion: 1.0.0
+EOF
+
+# values.yaml для Kafka
+cat > bank-chart/charts/kafka/values.yaml << 'EOF'
+replicaCount: 1
+image:
+  repository: bank-kafka
+  tag: latest
+  pullPolicy: IfNotPresent
+service:
+  port: 9092
+  targetPort: 9092
+  name: bank-kafka-service
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "500m"
+  limits:
+    memory: "1Gi"
+    cpu: "1000m"
+persistence:
+  enabled: true
+  size: 1Gi
+probe:
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 10
+EOF
+
+# deployment.yaml для Kafka
+cat > bank-chart/charts/kafka/templates/deployment.yaml << 'EOF'
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-kafka
+  labels:
+    app: kafka
+    release: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: kafka
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: kafka
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+      - name: kafka
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.service.targetPort }}
+        - containerPort: 9093
+          name: controller
+        env:
+        - name: KAFKA_PROCESS_ROLES
+          value: "broker,controller"
+        - name: KAFKA_NODE_ID
+          value: "1"
+        - name: KAFKA_CONTROLLER_QUORUM_VOTERS
+          value: "1@localhost:9093"
+        - name: KAFKA_CONTROLLER_LISTENER_NAMES
+          value: "CONTROLLER"
+        - name: KAFKA_LISTENERS
+          value: "PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093"
+        - name: KAFKA_ADVERTISED_LISTENERS
+          value: "PLAINTEXT://{{ .Values.service.name }}:9092"
+        - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+          value: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT"
+        - name: KAFKA_AUTO_CREATE_TOPICS_ENABLE
+          value: "true"
+        - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS
+          value: "1"
+        - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
+          value: "1"
+        - name: KAFKA_LOG_DIRS
+          value: "/var/lib/kafka/data"
+        - name: KAFKA_CLUSTER_ID
+          value: "5L6g3nShT-eMCtK--X86sw"
+        - name: KAFKA_BROKER_ID
+          value: "1"
+        - name: KAFKA_HEAP_OPTS
+          value: "-Xmx256M -Xms128M"
+        resources:
+          requests:
+            memory: {{ .Values.resources.requests.memory | quote }}
+            cpu: {{ .Values.resources.requests.cpu | quote }}
+          limits:
+            memory: {{ .Values.resources.limits.memory | quote }}
+            cpu: {{ .Values.resources.limits.cpu | quote }}
+        volumeMounts:
+        - name: kafka-data
+          mountPath: /var/lib/kafka/data
+        # ПРОСТЫЕ TCP PROBES - не зависят от наличия утилит
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.service.targetPort }}
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 6
+        readinessProbe:
+          tcpSocket:
+            port: {{ .Values.service.targetPort }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 6
+      volumes:
+      - name: kafka-data
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-kafka-pvc
+      restartPolicy: Always
+EOF
+
+# service.yaml для Kafka
+cat > bank-chart/charts/kafka/templates/service.yaml << 'EOF'
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.service.name }}
+  labels:
+    app: kafka
+    release: {{ .Release.Name }}
+spec:
+  type: ClusterIP
+  ports:
+  - port: {{ .Values.service.port }}
+    targetPort: {{ .Values.service.targetPort }}
+    protocol: TCP
+    name: kafka
+  selector:
+    app: kafka
+    release: {{ .Release.Name }}
+EOF
+
+# pvc.yaml для Kafka
+cat > bank-chart/charts/kafka/templates/pvc.yaml << 'EOF'
+{{- if .Values.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Release.Name }}-kafka-pvc
+  labels:
+    app: kafka
+    release: {{ .Release.Name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.persistence.size }}
+{{- end }}
 EOF
 
 # postgres

@@ -22,6 +22,7 @@ java_services=(
 infra_services=(
     "keycloak"
     "postgres"
+    "kafka"
 )
 
 echo -e "${YELLOW}📦 Building all Spring Boot microservices with mvnw...${NC}\n"

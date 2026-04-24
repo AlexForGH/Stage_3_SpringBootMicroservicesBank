@@ -1,0 +1,24 @@
+replicaCount: 1
+image:
+  repository: bank-kafka
+  tag: latest
+  pullPolicy: IfNotPresent
+service:
+  port: 9092
+  targetPort: 9092
+  name: bank-kafka-service
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "500m"
+  limits:
+    memory: "1Gi"
+    cpu: "1000m"
+persistence:
+  enabled: true
+  size: 1Gi
+probe:
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 10

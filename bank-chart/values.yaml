@@ -9,6 +9,7 @@ global:
     notification: "http://bank-notification-service:10004"
     frontUi: "http://bank-front-ui-service:30005"
     keycloakPublic: "http://localhost:30080"
+    kafka: "bank-kafka-service:9092"
   exposure:
     keycloak:
       type: NodePort
@@ -67,6 +68,33 @@ postgres:
     periodSeconds: 5
     timeoutSeconds: 5
     failureThreshold: 5
+
+kafka:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: bank-kafka
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 9092
+    targetPort: 9092
+    name: bank-kafka-service
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+  persistence:
+    enabled: true
+    size: 512Mi
+  probe:
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 10
 
 global-config:
   enabled: true

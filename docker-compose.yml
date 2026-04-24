@@ -18,6 +18,8 @@ x-t: &t
   TRANSFER_SERVER_URL: http://bank-transfer-service:10003
 x-n: &n
   NOTIFICATION_SERVER_URL: http://bank-notification-service:10004
+x-k: &k
+  KAFKA_SERVER_URL: bank-kafka-service:9092
 
 
 services:
@@ -50,6 +52,40 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  bank-kafka-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.kafka
+    ports:
+      - "9092:9092"
+    environment:
+      # KRaft режим
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      # Слушатели
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://bank-kafka-service:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      # Важные настройки для авто-создания топиков
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_OFFSETS_TOPIC_NUM_PARTITIONS: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_CLUSTER_ID: "5L6g3nShT-eMCtK--X86sw"
+
+    networks:
+      - bank-network
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
 
   bank-global-config-service:
     build:
@@ -99,7 +135,7 @@ services:
     ports:
       - "10002:10002"
     environment:
-      <<: [*gc, *kc, *db, *c, *n]
+      <<: [*gc, *kc, *db, *c, *n, *k]
     networks:
       - bank-network
     restart: unless-stopped  # Будет перезапускаться пока config не ответит
@@ -126,7 +162,7 @@ services:
     ports:
       - "10003:10003"
     environment:
-      <<: [*gc, *kc, *c, *n]
+      <<: [*gc, *kc, *c, *n, *k]
     networks:
       - bank-network
     restart: unless-stopped  # Будет перезапускаться пока config не ответит
@@ -151,7 +187,7 @@ services:
     ports:
       - "10004:10004"
     environment:
-      <<: [*gc]
+      <<: [*gc, *k]
     networks:
       - bank-network
     restart: unless-stopped  # Будет перезапускаться пока config не ответит

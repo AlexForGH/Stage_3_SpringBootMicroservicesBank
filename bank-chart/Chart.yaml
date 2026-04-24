@@ -30,3 +30,6 @@ dependencies:
   - name: front-ui
     version: 0.1.0
     condition: front-ui.enabled
+  - name: kafka
+    version: 0.1.0
+    condition: kafka.enabled

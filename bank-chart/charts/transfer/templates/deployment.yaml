@@ -42,6 +42,8 @@ spec:
           value: {{ $.Values.global.serviceUrls.cash }}
         - name: NOTIFICATION_SERVER_URL
           value: {{ $.Values.global.serviceUrls.notification }}
+        - name: KAFKA_SERVER_URL
+          value: {{ $.Values.global.serviceUrls.kafka }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
         livenessProbe:

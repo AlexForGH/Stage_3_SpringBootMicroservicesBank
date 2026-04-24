@@ -1,10 +1,10 @@
-# Stage_3_2_SpringBootCloudSimpleMicroservicesBankCICD
+# Stage_3_SpringBootMicroservicesBank
 
 ![Демо работы](./demo.gif)
 
 ## *EN*
-#### Project to demonstrate the capabilities of developing a microservice application using Spring Boot, organizing configuration management via Spring Boot Cloud, ensuring security via Spring Security and Keycloak, and deploying using k8s via the Helm package manager
-#### Tech stack: Spring Framework, Spring Boot, PostgreSQL, HTML, Thymeleaf, Spring Web, Spring Data JPA, Spring Cloud, RESTful API, Spring Security, Keycloak, Docker, k8s (Rancher Desktop), Helm
+#### Project to demonstrate the capabilities of developing a microservice application using Spring Boot, organizing configuration management via Spring Boot Cloud, ensuring security via Spring Security and Keycloak, deploying using k8s via the Helm package manager, and messaging using Kafka
+#### Tech stack: Spring Framework, Spring Boot, PostgreSQL, HTML, Thymeleaf, Spring Web, Spring Data JPA, Spring Cloud, RESTful API, Spring Security, Keycloak, Docker, k8s (Rancher Desktop), Helm, Kafka
 
 ### Application features:
     - user editing of their data
@@ -45,8 +45,8 @@
 
 
 ## *RU*
-#### Проект для демонстрации возможностей разработки с использованием Spring Boot микросервисного приложения, организации управления конфигурациями через Spring Boot Cloud, обеспечения безопасности через Spring Security и Keycloak и деплоя с помощью k8s через пакетный менеджер Helm
-#### Технологический стек: Spring Framework, Spring Boot, PostgreSQL, HTML, Thymeleaf, Spring Web, Spring Data JPA, Spring Cloud, RESTful API, Spring Security, Keycloak, Docker, k8s (Rancher Desktop), Helm
+#### Проект для демонстрации возможностей разработки с использованием Spring Boot микросервисного приложения, организации управления конфигурациями через Spring Boot Cloud, обеспечения безопасности через Spring Security и Keycloak, деплоя с помощью k8s через пакетный менеджер Helm и предачи сообщений с помощью Kafka
+#### Технологический стек: Spring Framework, Spring Boot, PostgreSQL, HTML, Thymeleaf, Spring Web, Spring Data JPA, Spring Cloud, RESTful API, Spring Security, Keycloak, Docker, k8s (Rancher Desktop), Helm, Kafka
 
 ### Возможности приложения:
     - редактирование пользоватлем своих данных

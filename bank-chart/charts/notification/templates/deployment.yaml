@@ -38,7 +38,8 @@ spec:
           value: {{ $.Values.global.serviceUrls.keycloakPublic }}
         - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI
           value: {{ $.Values.global.serviceUrls.keycloak }}/realms/bank-realm
-
+        - name: KAFKA_SERVER_URL
+          value: {{ $.Values.global.serviceUrls.kafka }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
         livenessProbe:
