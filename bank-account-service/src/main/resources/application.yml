@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: bank-account-service
+
+  config:
+    import: configserver:${GLOBAL_CONFIG_SERVER_URL:http://localhost:10000} # Параметры подключения к Cloud Config Server

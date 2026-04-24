@@ -1,0 +1,43 @@
+keycloak:
+    host: ${KEYCLOAK_HOST:${keycloak.public.host}}
+    public:
+      host: ${KEYCLOAK_PUBLIC_HOST:http://localhost:8080}
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: bank-front-ui-service
+#            client-secret: aGxKoi0oaLveUH7rZPIA0fjw2Bu5VBRD
+            client-secret: qfLkFz0Jy8OrMNrjeGRHRFTaVqR5HYTL
+            authorization-grant-type: authorization_code
+            scope: openid, profile, roles
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            provider: keycloak
+        provider:
+          keycloak:
+            # Явно переопределяем, чтобы быть уверенными
+            authorization-uri: ${keycloak.public.host}/realms/bank-realm/protocol/openid-connect/auth
+            token-uri: ${keycloak.host}/realms/bank-realm/protocol/openid-connect/token
+            jwk-set-uri: ${keycloak.host}/realms/bank-realm/protocol/openid-connect/certs
+            user-name-attribute: preferred_username
+
+server:
+  port: 10005
+
+api.account.base:
+  url: ${ACCOUNT_SERVER_URL:http://localhost:10002}
+  endpoint: "/api/account"
+
+api.transfer.base:
+  url: ${TRANSFER_SERVER_URL:http://localhost:10003}
+  endpoint: "/api/transfer"
+
+api.front_ui:
+  base_url: http://localhost:${server.port}
+  endpoint:
+    account: "/account"
+    cash: "/cash"
+    transfer: "/transfer"

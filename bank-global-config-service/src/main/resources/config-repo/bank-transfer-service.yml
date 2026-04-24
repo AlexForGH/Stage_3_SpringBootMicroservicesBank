@@ -1,0 +1,23 @@
+keycloak:
+    host: ${KEYCLOAK_HOST:http://localhost:8080}
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${keycloak.host}/realms/bank-realm
+
+server:
+  port: 10003
+
+api.cash.base:
+  url: ${CASH_SERVER_URL:http://localhost:10001}
+  endpoint: "/api/cash"
+
+api.notification.base:
+  url: ${NOTIFICATION_SERVER_URL:http://localhost:10004}
+  endpoint: "/api/notification"
+
+api.transfer.base:
+  endpoint: "/api/transfer"

@@ -1,0 +1,197 @@
+version: '3.8'
+
+x-kc: &kc
+  # Внутренний URL для сервис-к-сервис запросов
+  KEYCLOAK_HOST: http://keycloak-service:8080
+x-kcp: &kcp
+  # Публичный URL для браузера (должен быть доступен извне)
+  KEYCLOAK_PUBLIC_HOST: http://localhost:8080
+x-db: &db
+  DB_URL_PART: postgres-service:5432
+x-gc: &gc
+  GLOBAL_CONFIG_SERVER_URL: http://bank-global-config-service:10000
+x-c: &c
+  CASH_SERVER_URL: http://bank-cash-service:10001
+x-a: &a
+  ACCOUNT_SERVER_URL: http://bank-account-service:10002
+x-t: &t
+  TRANSFER_SERVER_URL: http://bank-transfer-service:10003
+x-n: &n
+  NOTIFICATION_SERVER_URL: http://bank-notification-service:10004
+
+
+services:
+
+  keycloak-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.keycloak
+    ports:
+      - "8080:8080"
+    networks:
+      - bank-network
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/localhost/8080'"]
+      interval: 10s
+      timeout: 3s
+      retries: 20
+      start_period: 60s
+
+  postgres-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - bank-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d my_schema"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  bank-global-config-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.global-config
+    ports:
+      - "10000:10000"
+    networks:
+      - bank-network
+    depends_on:
+      postgres-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/localhost/10000'"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+
+  bank-cash-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.cash
+    ports:
+      - "10001:10001"
+    environment:
+      <<: [*gc, *kc, *db]
+    networks:
+      - bank-network
+    restart: unless-stopped  # Будет перезапускаться пока config не ответит
+    depends_on:
+      bank-global-config-service:
+        condition: service_healthy
+      postgres-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/localhost/10001'"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 40s
+
+  bank-account-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.account
+    ports:
+      - "10002:10002"
+    environment:
+      <<: [*gc, *kc, *db, *c, *n]
+    networks:
+      - bank-network
+    restart: unless-stopped  # Будет перезапускаться пока config не ответит
+    depends_on:
+      bank-global-config-service:
+        condition: service_healthy
+      postgres-service:
+        condition: service_healthy
+      bank-cash-service:
+        condition: service_healthy
+      bank-notification-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/localhost/10002'"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 40s
+
+  bank-transfer-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.transfer
+    ports:
+      - "10003:10003"
+    environment:
+      <<: [*gc, *kc, *c, *n]
+    networks:
+      - bank-network
+    restart: unless-stopped  # Будет перезапускаться пока config не ответит
+    depends_on:
+      bank-global-config-service:
+        condition: service_healthy
+      bank-cash-service:
+        condition: service_healthy
+      bank-notification-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/localhost/10003'"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 40s
+
+  bank-notification-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.notification
+    ports:
+      - "10004:10004"
+    environment:
+      <<: [*gc]
+    networks:
+      - bank-network
+    restart: unless-stopped  # Будет перезапускаться пока config не ответит
+    depends_on:
+      bank-global-config-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/localhost/10004'"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 30s
+
+  bank-front-ui-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.front-ui
+    ports:
+      - "10005:10005"
+    environment:
+      <<: [*gc, *kc, *kcp, *a, *t]
+    networks:
+      - bank-network
+    restart: unless-stopped  # Будет перезапускаться пока config не ответит
+    depends_on:
+      bank-global-config-service:
+        condition: service_healthy
+      bank-account-service:
+        condition: service_healthy
+      bank-transfer-service:
+        condition: service_healthy
+      keycloak-service:
+        condition: service_started
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/localhost/10005'"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 40s
+
+networks:
+  bank-network:
+    driver: bridge
